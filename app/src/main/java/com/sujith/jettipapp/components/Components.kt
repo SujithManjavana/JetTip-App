@@ -1,5 +1,6 @@
 package com.sujith.jettipapp.components
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -35,7 +36,9 @@ fun MyInputField(
         value = valueState.value,
         onValueChange = { valueState.value = it },
         label = { Text(text = labelId) },
-        modifier = modifier.padding(start = 10.dp, end = 10.dp, bottom = 10.dp),
+        modifier = modifier
+            .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
+            .fillMaxWidth(),
         leadingIcon = {
             Icon(
                 imageVector = Icons.Rounded.CurrencyRupee,
