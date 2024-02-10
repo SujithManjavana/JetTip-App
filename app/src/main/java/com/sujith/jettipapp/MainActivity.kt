@@ -2,6 +2,7 @@ package com.sujith.jettipapp
 
 import android.accessibilityservice.AccessibilityService.SoftKeyboardController
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -38,7 +39,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MyApp {
-                TopHeader()
+              //  TopHeader()
                 MainContent()
             }
         }
@@ -92,6 +93,13 @@ fun TopHeader(totalPerPerson: Double = 125.0) {
 @Preview
 @Composable
 fun MainContent() {
+    BillForm(){
+        Log.e("FOO", "MainContent: $it")
+    }
+}
+
+@Composable
+fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) {
     val totalBillState = remember {
         mutableStateOf("")
     }
@@ -107,17 +115,15 @@ fun MainContent() {
         border = BorderStroke(2.dp, Color.LightGray)
     ) {
         Column {
-            Text(text = "hello")
-            Text(text = "hello")
-            Text(text = "hello")
             MyInputField(
                 valueState = totalBillState,
+                modifier = Modifier.fillMaxWidth(),//
                 labelId = "Enter bill",
                 enabled = true,
                 isSingleLine = true,
-                onAction = KeyboardActions{
-                    if(!validState)return@KeyboardActions
-                    //todo
+                onAction = KeyboardActions {
+                    if (!validState) return@KeyboardActions
+                    onValChange(totalBillState.value.trim())
                     keyboardController?.hide()
                 }
             )
