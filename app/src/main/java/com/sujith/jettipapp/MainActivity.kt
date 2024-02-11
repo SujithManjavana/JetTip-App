@@ -23,10 +23,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -47,7 +50,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MyApp {
-                //  TopHeader()
                 MainContent()
             }
         }
@@ -101,9 +103,12 @@ fun TopHeader(totalPerPerson: Double = 125.0) {
 @Preview
 @Composable
 fun MainContent() {
-    BillForm() {
-        Log.e("FOO", "MainContent: $it")
+    Column {
+        BillForm() {
+            Log.e("FOO", "MainContent: $it")
+        }
     }
+
 }
 
 @Composable
@@ -114,7 +119,15 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
     val validState = remember(totalBillState.value) {
         totalBillState.value.trim().isNotEmpty()
     }
+    val splitState = remember {
+        mutableIntStateOf(1)
+    }
+
     val keyboardController = LocalSoftwareKeyboardController.current
+    val sliderState = remember {
+        mutableFloatStateOf(0f)
+    }
+    TopHeader()
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -139,27 +152,56 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
                 }
             )
 
-            if (validState) {
-                Row(modifier = Modifier.padding(3.dp), horizontalArrangement = Arrangement.Start) {
-                    Text(text = "Split", modifier = Modifier.align(Alignment.CenterVertically))
-                    Spacer(modifier = Modifier.width(120.dp))
-                    Row(
-                        modifier = Modifier.padding(horizontal = 3.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        MyRoundIconButton(imageVector = Icons.Default.Remove, onClick = {})
-                        Text(
-                            text = "3",
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically)
-                                .padding(start = 9.dp, end = 9.dp)
-                        )
-                        MyRoundIconButton(imageVector = Icons.Default.Add, onClick = {})
-                    }
+            //  if (validState) {
+            Row(modifier = Modifier.padding(3.dp), horizontalArrangement = Arrangement.Start) {
+                Text(text = "Split", modifier = Modifier.align(Alignment.CenterVertically))
+                Spacer(modifier = Modifier.width(120.dp))
+                Row(
+                    modifier = Modifier.padding(horizontal = 3.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    MyRoundIconButton(
+                        imageVector = Icons.Default.Remove,
+                        onClick = { if (splitState.intValue > 1) splitState.intValue-- })
+                    Text(
+                        text = splitState.intValue.toString(),
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(start = 9.dp, end = 9.dp)
+                    )
+                    MyRoundIconButton(
+                        imageVector = Icons.Default.Add,
+                        onClick = { splitState.intValue++ })
                 }
-            } else {
-                Box() {}
             }
+            //Tip UI
+            Row(modifier = Modifier.padding(horizontal = 3.dp, vertical = 12.dp)) {
+                Text(
+                    text = "Tip",
+                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                )
+                Spacer(modifier = Modifier.width(200.dp))
+                Text(
+                    text = "$35.00",
+                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                )
+            }
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(text = (sliderState.floatValue * 100).toString())
+                Spacer(modifier = Modifier.height(14.dp))
+                Slider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    steps = 5,
+                    value = sliderState.floatValue,
+                    onValueChange = { newValue -> sliderState.floatValue = newValue })
+            }
+//            } else {
+//                Box() {}
+//            }
         }
     }
 }
