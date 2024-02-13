@@ -28,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sujith.jettipapp.components.MyInputField
 import com.sujith.jettipapp.ui.theme.JetTipAppTheme
+import com.sujith.jettipapp.util.calculateTotalTip
 import com.sujith.jettipapp.widgets.MyRoundIconButton
 
 class MainActivity : ComponentActivity() {
@@ -104,6 +106,7 @@ fun TopHeader(totalPerPerson: Double = 125.0) {
 @Composable
 fun MainContent() {
     Column {
+        TopHeader()
         BillForm() {
             Log.e("FOO", "MainContent: $it")
         }
@@ -127,7 +130,12 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
     val sliderState = remember {
         mutableFloatStateOf(0f)
     }
-    TopHeader()
+    val tipPercentage = (sliderState.floatValue * 100.0).toInt()
+    val tipAmountState = remember {
+        mutableDoubleStateOf(0.0)
+    }
+    val splitRange = IntRange(start = 1, endInclusive = 10)
+    // TopHeader()
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -171,7 +179,7 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
                     )
                     MyRoundIconButton(
                         imageVector = Icons.Default.Add,
-                        onClick = { splitState.intValue++ })
+                        onClick = { if (splitState.intValue < splitRange.last) splitState.intValue++ })
                 }
             }
             //Tip UI
@@ -182,7 +190,7 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
                 )
                 Spacer(modifier = Modifier.width(200.dp))
                 Text(
-                    text = "$35.00",
+                    text = "$ ${tipAmountState.doubleValue}",
                     modifier = Modifier.align(alignment = Alignment.CenterVertically)
                 )
             }
@@ -191,13 +199,20 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(text = (sliderState.floatValue * 100).toString())
+                Text(text = "$tipPercentage%")
                 Spacer(modifier = Modifier.height(14.dp))
                 Slider(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     steps = 5,
                     value = sliderState.floatValue,
-                    onValueChange = { newValue -> sliderState.floatValue = newValue })
+                    onValueChange = { newValue ->
+                        sliderState.floatValue = newValue
+                        tipAmountState.doubleValue =
+                            calculateTotalTip(
+                                billAmount = totalBillState.value.toDouble(),
+                                tipPercentage = (newValue * 100.0).toInt()
+                            )
+                    })
             }
 //            } else {
 //                Box() {}
@@ -205,6 +220,8 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
         }
     }
 }
+
+
 
 //@Preview(showBackground = true)
 //@Composable
